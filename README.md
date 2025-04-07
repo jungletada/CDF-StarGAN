@@ -1,7 +1,6 @@
 
-## StarGAN v2 - Official PyTorch Implementation
+## StarGAN v2 for CFD - Official PyTorch Implementation
 
-<p align="left"><img width="95%" src="assets/teaser.jpg" /></p>
 
 > **StarGAN v2: Diverse Image Synthesis for Multiple Domains**<br>
 > [Yunjey Choi](https://github.com/yunjey)\*, [Youngjung Uh](https://github.com/youngjung)\*, [Jaejun Yoo](http://jaejunyoo.blogspot.com/search/label/kr)\*, [Jung-Woo Ha](https://www.facebook.com/jungwoo.ha.921)<br>
@@ -12,13 +11,6 @@
 
 > **Abstract:** *A good image-to-image translation model should learn a mapping between different visual domains while satisfying the following properties: 1) diversity of generated images and 2) scalability over multiple domains. Existing methods address either of the issues, having limited diversity or multiple models for all domains. We propose StarGAN v2, a single framework that tackles both and shows significantly improved results over the baselines. Experiments on CelebA-HQ and a new animal faces dataset (AFHQ) validate our superiority in terms of visual quality, diversity, and scalability. To better assess image-to-image translation models, we release AFHQ, high-quality animal faces with large inter- and intra-domain variations. The code, pre-trained models, and dataset are available at clovaai/stargan-v2.*
 
-## Teaser video
-Click the figure to watch the teaser video. <br/>
-
-[![IMAGE ALT TEXT HERE](assets/youtube_video.jpg)](https://youtu.be/0EVh5Ki4dIY)
-
-## TensorFlow implementation
-The TensorFlow implementation of StarGAN v2 by our team member junho can be found at [clovaai/stargan-v2-tensorflow](https://github.com/clovaai/stargan-v2-tensorflow).
 
 ## Software installation
 Clone this repository:
@@ -53,7 +45,6 @@ bash download.sh wing
 bash download.sh afhq-dataset
 bash download.sh pretrained-network-afhq
 ```
-
 
 ## Generating interpolation videos
 After downloading the pre-trained networks, you can synthesize output images reflecting diverse styles (e.g., hairstyle) of reference images. The following commands will save generated images and interpolation videos to the `expr/results` directory. 
