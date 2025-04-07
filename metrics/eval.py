@@ -9,7 +9,9 @@ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
 
 import os
+import cv2
 import shutil
+from PIL import Image
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -23,15 +25,42 @@ from core.data_loader_cfd import get_eval_loader
 from core import utils
 
 
-def visualize_results(contour, prediction, filename):
+color_map ={'pressure':'viridis', 'temperature':'plasma', 'velocity':'magma'}
+
+
+def load_transform_image(file_path, target_height=256, target_width=512):
+    img = Image.open(file_path).convert('L')
+    image = np.array(img)
+    original_height, original_width = image.shape
+    scale = target_height / original_height
+    new_width = int(original_width * scale)
+    resized = cv2.resize(image, (new_width, target_height), interpolation=cv2.INTER_LINEAR)
+        
+    width_left = (resized.shape[1] - target_width) // 2
+    cropped = resized[:, width_left:width_left + target_width]
+    
+    img = 1.0 - (cropped.astype(np.float32) / 255.0)
+    # img = np.expand_dims(img, axis=0)  # 形状变为 (1, H, W)
+    
+    tensor = torch.from_numpy(img)
+    return tensor
+
+
+def visualize_results(contour, prediction, file_name, gt_name, cmap=None):
     # Create a plot with the reversed grayscale colormap so 0=white, 1=black
-    data = prediction * contour
-    data = data.cpu().numpy()
+    if cmap is None:
+        cmap = 'gray_r'
+    pred = (prediction * contour).cpu()
+    label = load_transform_image(gt_name)
+    label = label * contour.cpu()
+    data = torch.cat([pred, label], dim=0)
+    data = data.numpy()
+
     plt.figure()
-    plt.imshow(data, cmap='gray_r', vmin=0, vmax=1)  # vmin/vmax set to 0-1 for proper color scaling
+    plt.imshow(data, cmap=cmap, vmin=0, vmax=1)  # vmin/vmax set to 0-1 for proper color scaling
     plt.axis('off')  # Optional: turn off axes for a cleaner image
     # Save the figure to a TIFF file
-    plt.savefig(filename, format='png')
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
     plt.close()
 
 
@@ -50,12 +79,16 @@ def calculate_metrics(nets, args, step, mode):
     for trg_idx, trg_domain in enumerate(domains):
         if trg_domain == 'contour':
             continue
-        # src_domains = [x for x in domains if x != trg_domain]
         src_domains = ['contour']
         print(f'src_domains={src_domains}, and target domain={trg_domain}')
-
+        path_gt = os.path.join(args.val_img_dir, trg_domain)
+        loader_gt = get_eval_loader(root=path_gt,
+                                    img_size=args.img_size,
+                                    batch_size=args.val_batch_size,
+                                    imagenet_normalize=False,
+                                    drop_last=True)
         if mode == 'reference':
-            path_ref = os.path.join(args.val_img_dir, trg_domain)
+            path_ref = os.path.join(args.train_img_dir, trg_domain)
             loader_ref = get_eval_loader(root=path_ref,
                                          img_size=args.img_size,
                                          batch_size=args.val_batch_size,
@@ -76,7 +109,7 @@ def calculate_metrics(nets, args, step, mode):
 
             # lpips_values = []
             print('Generating images for %s...' % task)
-            for i, input_dict in enumerate(tqdm(loader_src, total=len(loader_src))):
+            for i, (input_dict, gt_dict) in enumerate(tqdm(zip(loader_src, loader_gt), total=len(loader_src))):
                 x_src = input_dict['image']
                 filename = input_dict['filename']
                 N = x_src.size(0)
@@ -94,7 +127,7 @@ def calculate_metrics(nets, args, step, mode):
                             x_ref = next(iter_ref).to(device)
                         except:
                             iter_ref = iter(loader_ref)
-                            x_ref = next(iter_ref).to(device)
+                            x_ref = next(iter_ref)['image'].to(device)
 
                         if x_ref.size(0) > N:
                             x_ref = x_ref[:N]
@@ -102,17 +135,20 @@ def calculate_metrics(nets, args, step, mode):
 
                     x_fake = nets.generator(x_src, s_trg, masks=masks)
                     group_of_images.append(x_fake)
+                   
                 group_of_images = torch.cat(group_of_images, dim=1)
                 avg_image = torch.mean(group_of_images, dim=1)
                 
                 # save generated images to calculate FID later
                 for k in range(N):
                     fname = filename[k]
-                    fname = os.path.join(path_fake, fname.replace('.tiff', '.png'))
-                    
+                    pred_name = os.path.join(path_fake, fname.replace('.tiff', '.png'))
+                    gt_name = os.path.join(args.val_img_dir, trg_domain, fname)
                     visualize_results(contour=x_src[k].squeeze(), 
                                       prediction=avg_image[k], 
-                                      filename=fname)
+                                      file_name=pred_name,
+                                      gt_name=gt_name, 
+                                      cmap=color_map[trg_domain])
                     
                 #     utils.save_image(avg_image, ncol=1, filename=filename)
         ##############################################################################

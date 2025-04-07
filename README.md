@@ -68,22 +68,6 @@ python main.py --mode align \
 ```
 
 
-<p align="left"><img width="99%" src="assets/celebahq_interpolation.gif" /></p>
-
-
-<b>AFHQ.</b> To generate images and interpolation videos, run the following command:
-
-
-```bash
-python main.py --mode sample --num_domains 3 --resume_iter 100000 --w_hpf 0 \
-               --checkpoint_dir expr/checkpoints/afhq \
-               --result_dir expr/results/afhq \
-               --src_dir assets/representative/afhq/src \
-               --ref_dir assets/representative/afhq/ref
-```
-
-<p align="left"><img width="99%" src="assets/afhq_interpolation.gif" /></p>
-
 ## Evaluation metrics
 To evaluate StarGAN v2 using [Fr&eacute;chet Inception Distance (FID)](https://arxiv.org/abs/1706.08500) and [Learned Perceptual Image Patch Similarity (LPIPS)](https://arxiv.org/abs/1801.03924), run the following commands:
 
@@ -96,14 +80,6 @@ python main.py --mode eval --num_domains 4 --w_hpf 1 \
                --val_img_dir data/case_data2/fluent_data_fig \
                --checkpoint_dir expr/checkpoints \
                --eval_dir expr/eval
-
-# afhq
-python main.py --mode eval --num_domains 3 --w_hpf 0 \
-               --resume_iter 100000 \
-               --train_img_dir data/afhq/train \
-               --val_img_dir data/afhq/val \
-               --checkpoint_dir expr/checkpoints/afhq \
-               --eval_dir expr/eval/afhq
 ```
 
 Note that the evaluation metrics are calculated using random latent vectors or reference images, both of which are selected by the [seed number](https://github.com/clovaai/stargan-v2/blob/master/main.py#L35). In the paper, we reported the average of values from 10 measurements using different seed numbers. The following table shows the calculated values for both latent-guided and reference-guided synthesis.

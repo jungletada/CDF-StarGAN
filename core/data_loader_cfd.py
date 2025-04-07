@@ -76,19 +76,14 @@ def transform_train(image, target_height=256, target_width=512):
 
 
 def transform_test(image, target_height=256, target_width=512):
-    """
-    """
-    # 2. 按目标高度进行 resize（保持宽高比）
     original_height, original_width = image.shape
     scale = target_height / original_height
     new_width = int(original_width * scale)
     resized = cv2.resize(image, (new_width, target_height), interpolation=cv2.INTER_LINEAR)
         
-    # 4. 对图像中心进行裁剪，裁剪出目标宽度
     width_left = (resized.shape[1] - target_width) // 2
     cropped = resized[:, width_left:width_left + target_width]
     
-    # 5. 将像素值归一化，并反转（1.0 - value），再扩展通道维度
     img = 1.0 - (cropped.astype(np.float32) / 255.0)
     img = np.expand_dims(img, axis=0)  # 形状变为 (1, H, W)
     

@@ -134,7 +134,7 @@ if __name__ == '__main__':
                         help='Decay rate for 2nd moment of Adam')
     parser.add_argument('--weight_decay', type=float, default=1e-4,
                         help='Weight decay for optimizer')
-    parser.add_argument('--num_outs_per_domain', type=int, default=1,
+    parser.add_argument('--num_outs_per_domain', type=int, default=10,
                         help='Number of generated images per domain during sampling')
 
     # misc
