@@ -7,18 +7,18 @@ This work is licensed under the Creative Commons Attribution-NonCommercial
 http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
-
-from pathlib import Path
-from itertools import chain
 import os
 import cv2
-import random
+import torch
 
+
+import random
+import numpy as np
+from pathlib import Path
+from itertools import chain
 from munch import Munch
 from PIL import Image
-import numpy as np
 
-import torch
 from torch.utils import data
 from torch.utils.data.sampler import WeightedRandomSampler
 from torchvision import transforms
