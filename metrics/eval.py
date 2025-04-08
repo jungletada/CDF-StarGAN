@@ -59,7 +59,6 @@ def visualize_results(contour, prediction, file_name, gt_name, cmap=None):
     plt.figure()
     plt.imshow(data, cmap=cmap, vmin=0, vmax=1)  # vmin/vmax set to 0-1 for proper color scaling
     plt.axis('off')  # Optional: turn off axes for a cleaner image
-    # Save the figure to a TIFF file
     plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
     plt.close()
 
@@ -81,12 +80,6 @@ def calculate_metrics(nets, args, step, mode):
             continue
         src_domains = ['contour']
         print(f'src_domains={src_domains}, and target domain={trg_domain}')
-        path_gt = os.path.join(args.val_img_dir, trg_domain)
-        loader_gt = get_eval_loader(root=path_gt,
-                                    img_size=args.img_size,
-                                    batch_size=args.val_batch_size,
-                                    imagenet_normalize=False,
-                                    drop_last=True)
         if mode == 'reference':
             path_ref = os.path.join(args.train_img_dir, trg_domain)
             loader_ref = get_eval_loader(root=path_ref,
@@ -109,7 +102,7 @@ def calculate_metrics(nets, args, step, mode):
 
             # lpips_values = []
             print('Generating images for %s...' % task)
-            for i, (input_dict, gt_dict) in enumerate(tqdm(zip(loader_src, loader_gt), total=len(loader_src))):
+            for i, input_dict in enumerate(tqdm(loader_src)):
                 x_src = input_dict['image']
                 filename = input_dict['filename']
                 N = x_src.size(0)
