@@ -33,14 +33,6 @@ def _make_balanced_sampler(labels):
 
 
 def transform_train(image, target_height=256, target_width=512):
-    """
-    对单通道图像进行以下预处理：
-      1. 随机旋转（角度在 -15 到 15 之间）；
-      2. 按目标高度 resize，同时保持宽高比；
-      3. 随机水平翻转（50% 概率）；
-      4. 对图像中心裁剪到目标宽度；
-      5. 将图像反转并归一化到 [0, 1]，最后转换为 tensor 格式（形状为 (1, H, W)）。
-    """
     # 随机生成旋转角度及旋转中心
     angle = np.random.uniform(-15, 15)
     center = (image.shape[1] // 2, image.shape[0] // 2)  # (x, y)
@@ -59,9 +51,9 @@ def transform_train(image, target_height=256, target_width=512):
     new_width = int(original_width * scale)
     resized = cv2.resize(rotated, (new_width, target_height), interpolation=cv2.INTER_LINEAR)
     
-    # 3. 随机水平翻转
-    if flip_flag:
-        resized = np.fliplr(resized)
+    # # 3. 随机水平翻转
+    # if flip_flag:
+    #     resized = np.fliplr(resized)
         
     # 4. 对图像中心进行裁剪，裁剪出目标宽度
     width_left = (resized.shape[1] - target_width) // 2

@@ -25,7 +25,7 @@ from core.data_loader_cfd import get_eval_loader
 from core import utils
 
 
-color_map ={'pressure':'viridis', 'temperature':'plasma', 'velocity':'magma'}
+color_map ={'pressure':'viridis', 'temperature':'PiYG', 'velocity':'magma'}
 
 
 def load_transform_image(file_path, target_height=256, target_width=512):
