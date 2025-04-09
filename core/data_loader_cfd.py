@@ -32,37 +32,42 @@ def _make_balanced_sampler(labels):
     return WeightedRandomSampler(weights, len(weights))
 
 
-def transform_train(image, target_height=256, target_width=512):
-    # 随机生成旋转角度及旋转中心
+def transform_train(contour_image, target_height=256, target_width=512):
+    # Rotatation
     angle = np.random.uniform(-15, 15)
-    center = (image.shape[1] // 2, image.shape[0] // 2)  # (x, y)
+    center = (contour_image.shape[1] // 2, contour_image.shape[0] // 2)  # (x, y)
     rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
-    
-    # 生成水平翻转标志（50% 概率）
-    flip_flag = np.random.rand() < 0.5
-
-    # 1. 随机旋转
-    rotated = cv2.warpAffine(image, rotation_matrix, (image.shape[1], image.shape[0]),
-                             flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
-    
-    # 2. 按目标高度进行 resize（保持宽高比）
-    original_height, original_width = rotated.shape
-    scale = target_height / original_height
-    new_width = int(original_width * scale)
-    resized = cv2.resize(rotated, (new_width, target_height), interpolation=cv2.INTER_LINEAR)
-    
-    # # 3. 随机水平翻转
-    # if flip_flag:
-    #     resized = np.fliplr(resized)
+    # rotation flag
+    flip_flag = False # np.random.rand() < 0.5
+    # Apply rotation to the first image to compute the new dimensions (should remain same as original for cv2.warpAffine)
+    # Use cv2.BORDER_REFLECT to avoid black borders.
+    def transform_single(image):
+        # 1. Random Rotation
+        rotated = cv2.warpAffine(image, rotation_matrix, (image.shape[1], image.shape[0]),
+                                 flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
         
-    # 4. 对图像中心进行裁剪，裁剪出目标宽度
-    width_left = (resized.shape[1] - target_width) // 2
-    cropped = resized[:, width_left:width_left + target_width]
+        # 2. Resize the rotated image so that its height is target_height while preserving aspect ratio.
+        original_height, original_width = rotated.shape
+        scale = target_height / original_height
+        new_width = int(original_width * scale)
+        resized = cv2.resize(rotated, (new_width, target_height), interpolation=cv2.INTER_LINEAR)
+        
+        # 3. Random horizontal flip (50% chance) using the same decision for all images.
+        # (We generate the flip flag once outside, so here we assume that variable is defined)
+        if flip_flag:
+            resized = np.fliplr(resized)
+        
+        # 4. Center crop to target_width.
+        width_left = (resized.shape[1] - target_width) // 2
+        cropped = resized[:, width_left:width_left + target_width]
+        
+        return cropped
+
+    cropped = transform_single(contour_image)
     
     # 5. 将像素值归一化，并反转（1.0 - value），再扩展通道维度
     img = 1.0 - (cropped.astype(np.float32) / 255.0)
     img = np.expand_dims(img, axis=0)  # 形状变为 (1, H, W)
-    
     tensor = torch.from_numpy(img)
     return tensor
 
