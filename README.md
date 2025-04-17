@@ -10,9 +10,9 @@
 
 > **Abstract:** *A good image-to-image translation model should learn a mapping between different visual domains while satisfying the following properties: 1) diversity of generated images and 2) scalability over multiple domains. Existing methods address either of the issues, having limited diversity or multiple models for all domains. We propose StarGAN v2, a single framework that tackles both and shows significantly improved results over the baselines. Experiments on CelebA-HQ and a new animal faces dataset (AFHQ) validate our superiority in terms of visual quality, diversity, and scalability. To better assess image-to-image translation models, we release AFHQ, high-quality animal faces with large inter- and intra-domain variations. The code, pre-trained models, and dataset are available at clovaai/stargan-v2.*
 
-<img src="assets/831_pressure.png"  style="zoom: 80%;" />
-<img src="assets/831_temperature.png"  style="zoom: 80%;" />
-<img src="assets/831_velocity.png"  style="zoom: 80%;" />
+<img src="assets/831_pressure.png"  style="zoom: 50%;" />
+<img src="assets/831_temperature.png"  style="zoom: 50%;" />
+<img src="assets/831_velocity.png"  style="zoom: 50%;" />
 
 ## Software installation
 Clone this repository:
