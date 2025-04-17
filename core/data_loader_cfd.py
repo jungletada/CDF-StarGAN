@@ -34,7 +34,7 @@ def _make_balanced_sampler(labels):
 
 def transform_train(contour_image, target_height=256, target_width=512):
     # Rotatation
-    angle = np.random.uniform(-15, 15)
+    angle = np.random.uniform(-5, 5)
     center = (contour_image.shape[1] // 2, contour_image.shape[0] // 2)  # (x, y)
     rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
     # rotation flag
@@ -54,8 +54,8 @@ def transform_train(contour_image, target_height=256, target_width=512):
         
         # 3. Random horizontal flip (50% chance) using the same decision for all images.
         # (We generate the flip flag once outside, so here we assume that variable is defined)
-        if flip_flag:
-            resized = np.fliplr(resized)
+        # if flip_flag:
+        #     resized = np.fliplr(resized)
         
         # 4. Center crop to target_width.
         width_left = (resized.shape[1] - target_width) // 2

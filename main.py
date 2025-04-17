@@ -11,9 +11,9 @@ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 import os
 import argparse
 
+import torch
 from munch import Munch
 from torch.backends import cudnn
-import torch
 
 from core.data_loader_cfd import get_train_loader
 from core.data_loader_cfd import get_test_loader
