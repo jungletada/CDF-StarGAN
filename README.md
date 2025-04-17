@@ -7,11 +7,12 @@
 > [Yunjey Choi](https://github.com/yunjey)\*, [Youngjung Uh](https://github.com/youngjung)\*, [Jaejun Yoo](http://jaejunyoo.blogspot.com/search/label/kr)\*, [Jung-Woo Ha](https://www.facebook.com/jungwoo.ha.921)<br>
 > In CVPR 2020. (* indicates equal contribution)<br>
 
-> Paper: https://arxiv.org/abs/1912.01865<br>
-> Video: https://youtu.be/0EVh5Ki4dIY<br>
 
 > **Abstract:** *A good image-to-image translation model should learn a mapping between different visual domains while satisfying the following properties: 1) diversity of generated images and 2) scalability over multiple domains. Existing methods address either of the issues, having limited diversity or multiple models for all domains. We propose StarGAN v2, a single framework that tackles both and shows significantly improved results over the baselines. Experiments on CelebA-HQ and a new animal faces dataset (AFHQ) validate our superiority in terms of visual quality, diversity, and scalability. To better assess image-to-image translation models, we release AFHQ, high-quality animal faces with large inter- and intra-domain variations. The code, pre-trained models, and dataset are available at clovaai/stargan-v2.*
 
+<img src="assets/831_pressure.png"  style="zoom: 80%;" />
+<img src="assets/831_temperature.png"  style="zoom: 80%;" />
+<img src="assets/831_velocity.png"  style="zoom: 80%;" />
 
 ## Software installation
 Clone this repository:
@@ -32,41 +33,7 @@ pip install pillow==7.0.0 scipy==1.2.1 tqdm==4.43.0 munch==2.5.0
 ```
 
 ## Datasets and pre-trained networks
-<!-- We provide a script to download datasets used in StarGAN v2 and the corresponding pre-trained networks. The datasets and network checkpoints will be downloaded and stored in the `data` and `expr/checkpoints` directories, respectively.
-
-<b>CelebA-HQ.</b> To download the [CelebA-HQ](https://drive.google.com/drive/folders/0B4qLcYyJmiz0TXY1NG02bzZVRGs) dataset and the pre-trained network, run the following commands:
-```bash
-bash download.sh celeba-hq-dataset
-bash download.sh pretrained-network-celeba-hq
-bash download.sh wing
-```
-
-<b>AFHQ.</b> To download the [AFHQ](https://github.com/clovaai/stargan-v2/blob/master/README.md#animal-faces-hq-dataset-afhq) dataset and the pre-trained network, run the following commands:
-```bash
-bash download.sh afhq-dataset
-bash download.sh pretrained-network-afhq
-``` -->
-
-<!-- ## Generating interpolation videos
-After downloading the pre-trained networks, you can synthesize output images reflecting diverse styles (e.g., hairstyle) of reference images. The following commands will save generated images and interpolation videos to the `expr/results` directory. 
-
-
-<b>CelebA-HQ.</b> To generate images and interpolation videos, run the following command:
-```bash
-python main.py --mode sample --num_domains 2 --resume_iter 100000 --w_hpf 1 \
-               --checkpoint_dir expr/checkpoints/celeba_hq \
-               --result_dir expr/results/celeba_hq \
-               --src_dir assets/representative/celeba_hq/src \
-               --ref_dir assets/representative/celeba_hq/ref
-```
-
-To transform a custom image, first crop the image manually so that the proportion of face occupied in the whole is similar to that of CelebA-HQ. Then, run the following command for additional fine rotation and cropping. All custom images in the `inp_dir` directory will be aligned and stored in the `out_dir` directory. -->
-
-<!-- ```bash
-python main.py --mode align \
-               --inp_dir assets/representative/custom/female \
-               --out_dir assets/representative/celeba_hq/src/female
-``` -->
+<!-- We provide a script to download datasets used in StarGAN v2 and the corresponding pre-trained networks. The datasets and network checkpoints will be downloaded and stored in the `data` and `expr/checkpoints` directories, respectively. -->
 
 
 ## Evaluation metrics
@@ -97,25 +64,6 @@ To train StarGAN v2 from scratch, run the following commands. Generated images a
 python main.py --mode train --num_domains 4 --w_hpf 1 \
 ```
 
-<!-- ## Animal Faces-HQ dataset (AFHQ)
-
-<p align="left"><img width="99%" src="assets/afhq_dataset.jpg" /></p>
-
-We release a new dataset of animal faces, Animal Faces-HQ (AFHQ), consisting of 15,000 high-quality images at 512×512 resolution. The figure above shows example images of the AFHQ dataset. The dataset includes three domains of cat, dog, and wildlife, each providing about 5000 images. By having multiple (three) domains and diverse images of various breeds per each domain, AFHQ sets a challenging image-to-image translation problem. For each domain, we select 500 images as a test set and provide all remaining images as a training set. To download the dataset, run the following command: -->
-<!-- 
-```bash
-bash download.sh afhq-dataset
-``` -->
-
-
-**[Update: 2021.07.01]** We rebuild the original AFHQ dataset by using high-quality resize filtering (i.e., Lanczos resampling). Please see the [clean FID paper](https://arxiv.org/abs/2104.11222) that brings attention to the unfortunate software library situation for downsampling. We thank to [Alias-Free GAN](https://nvlabs.github.io/alias-free-gan/) authors for their suggestion and contribution to the updated AFHQ dataset. If you use the updated dataset, we recommend to cite not only our paper but also their paper.
-
-The differences from the original dataset are as follows:
-* We resize the images using Lanczos resampling instead of nearest neighbor downsampling.
-* About 2% of the original images had been removed. So the set is now has 15803 images, whereas the original had 16130.
-* Images are saved as PNG format to avoid compression artifacts. This makes the files bigger than the original, but it's worth it.
-
-
 <!-- To download the updated dataset, run the following command:
 
 ```bash
@@ -123,7 +71,6 @@ bash download.sh afhq-v2-dataset
 ``` -->
 <!-- 
 <p align="left"><img width="99%" src="assets/afhqv2_teaser2.jpg" /></p> -->
-
 
 
 ## License
