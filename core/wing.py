@@ -192,7 +192,6 @@ class FAN(nn.Module):
         super(FAN, self).__init__()
         self.num_modules = num_modules
         self.end_relu = end_relu
-
         # Base part
         self.conv1 = CoordConvTh(256, 256, True, False,
                                  in_channels=1, out_channels=64,

@@ -1,11 +1,10 @@
 
-# StarGAN v2 for CFD
-## - Official PyTorch Implementation
+# StarGAN v2 for Computational Fluid Dynamics (CFD) 
 
 
-> **StarGAN v2: Diverse Image Synthesis for Multiple Domains**<br>
+> Code Base **StarGAN v2: Diverse Image Synthesis for Multiple Domains**<br>
 > [Yunjey Choi](https://github.com/yunjey)\*, [Youngjung Uh](https://github.com/youngjung)\*, [Jaejun Yoo](http://jaejunyoo.blogspot.com/search/label/kr)\*, [Jung-Woo Ha](https://www.facebook.com/jungwoo.ha.921)<br>
-> In CVPR 2020. (* indicates equal contribution)<br>
+Modified by Dingjie PENG, Waseda Unniversity, Japan
 
 
 <!-- > **Abstract:** *A good image-to-image translation model should learn a mapping between different visual domains while satisfying the following properties: 1) diversity of generated images and 2) scalability over multiple domains. Existing methods address either of the issues, having limited diversity or multiple models for all domains. We propose StarGAN v2, a single framework that tackles both and shows significantly improved results over the baselines. Experiments on CelebA-HQ and a new animal faces dataset (AFHQ) validate our superiority in terms of visual quality, diversity, and scalability. To better assess image-to-image translation models, we release AFHQ, high-quality animal faces with large inter- and intra-domain variations. The code, pre-trained models, and dataset are available at clovaai/stargan-v2.* -->
@@ -40,6 +39,8 @@ To train StarGAN v2 from scratch, run the following commands. Generated images a
 
 ```bash
 python main.py --mode train --num_domains 4 --w_hpf 1 \
+               --train_img_dir data/case_data1/fluent_data_map \
+               --val_img_dir data/case_data2/fluent_data_map \
 ```
 
 ## Evaluation metrics
@@ -48,28 +49,14 @@ To evaluate StarGAN v2 using [Fr&eacute;chet Inception Distance (FID)](https://a
 
 ```bash
 python main.py --mode eval --num_domains 4 --w_hpf 1 \
-               --resume_iter 100000 \
-               --train_img_dir data/case_data1/fluent_data_fig \
-               --val_img_dir data/case_data2/fluent_data_fig \
+               --train_img_dir data/case_data1/fluent_data_map \
+               --val_img_dir data/case_data2/fluent_data_map \
                --checkpoint_dir expr/checkpoints \
+               --resume_iter 100000 \
                --eval_dir expr/eval
 ```
 
 Note that the evaluation metrics are calculated using random latent vectors or reference images, both of which are selected by the [seed number](https://github.com/clovaai/stargan-v2/blob/master/main.py#L35). In the paper, we reported the average of values from 10 measurements using different seed numbers. The following table shows the calculated values for both latent-guided and reference-guided synthesis.
-
-| Dataset <img width=50/> | <img width=15/> FID (latent) <img width=15/>  | <img width=10/> LPIPS (latent) <img width=10/> | <img width=5/> FID (reference) <img width=5/> | LPIPS (reference) | <img width=10/> Elapsed time <img width=10/>  |
-| :---------- | :------------: | :----: | :-----: | :----: | :----------:|
-| `celeba-hq` | 13.73 &pm; 0.06 | 0.4515 &pm; 0.0006  | 23.84  &pm; 0.03 | 0.3880 &pm; 0.0001 | 49min 51s
-| `afhq` | 16.18 &pm; 0.15 | 0.4501 &pm; 0.0007 | 19.78 &pm; 0.01 | 0.4315 &pm; 0.0002 | 64min 49s
-
-
-<!-- To download the updated dataset, run the following command:
-
-```bash
-bash download.sh afhq-v2-dataset
-``` -->
-<!-- 
-<p align="left"><img width="99%" src="assets/afhqv2_teaser2.jpg" /></p> -->
 
 
 ## License
@@ -80,7 +67,7 @@ For technical and other inquires, please contact yunjey.choi@navercorp.com.
 
 
 ## Citation
-If you find this work useful for your research, please cite our paper:
+If you find this work useful for your research, please cite starganv2 paper:
 
 ```
 @inproceedings{choi2020starganv2,
@@ -90,6 +77,3 @@ If you find this work useful for your research, please cite our paper:
   year={2020}
 }
 ```
-
-## Acknowledgements
-We would like to thank the full-time and visiting Clova AI Research (now NAVER AI Lab) members for their valuable feedback and an early review: especially Seongjoon Oh, Junsuk Choe, Muhammad Ferjad Naeem, and Kyungjune Baek. We also thank Alias-Free GAN authors for their contribution to the updated AFHQ dataset.

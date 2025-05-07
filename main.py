@@ -40,38 +40,40 @@ def main(args):
         assert len(subdirs(args.train_img_dir)) == args.num_domains
         assert len(subdirs(args.val_img_dir)) == args.num_domains
         loaders = Munch(
-                        src=get_train_loader(root=args.train_img_dir,
-                                             which='source',
-                                             img_size=args.img_size,
-                                             batch_size=args.batch_size,
-                                             prob=args.randcrop_prob,
-                                             num_workers=args.num_workers),
-                        ref=get_train_loader(root=args.train_img_dir,
-                                             which='reference',
-                                             img_size=args.img_size,
-                                             batch_size=args.batch_size,
-                                             prob=args.randcrop_prob,
-                                             num_workers=args.num_workers),
-                        val=get_test_loader(root=args.val_img_dir,
-                                            img_size=args.img_size,
-                                            batch_size=args.val_batch_size,
-                                            shuffle=True,
-                                            num_workers=args.num_workers))
+                src=get_train_loader(
+                    root=args.train_img_dir,
+                    which='source',
+                    batch_size=args.batch_size,
+                    num_workers=args.num_workers),
+
+                ref=get_train_loader(
+                    root=args.train_img_dir,
+                    which='reference',
+                    batch_size=args.batch_size,
+                    num_workers=args.num_workers),
+
+                val=get_test_loader(
+                    root=args.val_img_dir,
+                    batch_size=args.val_batch_size,
+                    shuffle=True,
+                    num_workers=args.num_workers))
+        
         solver.train(loaders)
 
     elif args.mode == 'sample':
-        # assert len(subdirs(args.src_dir)) == args.num_domains
-        # assert len(subdirs(args.ref_dir)) == args.num_domains
-        loaders = Munch(src=get_test_loader(root=args.src_dir,
-                                            img_size=args.img_size,
-                                            batch_size=args.val_batch_size,
-                                            shuffle=False,
-                                            num_workers=args.num_workers),
-                        ref=get_test_loader(root=args.ref_dir,
-                                            img_size=args.img_size,
-                                            batch_size=args.val_batch_size,
-                                            shuffle=False,
-                                            num_workers=args.num_workers))
+        loaders = Munch(src=get_test_loader(
+                                root=args.src_dir,
+                                img_size=args.img_size,
+                                batch_size=args.val_batch_size,
+                                shuffle=False,
+                                num_workers=args.num_workers),
+
+                        ref=get_test_loader(
+                                root=args.ref_dir,
+                                img_size=args.img_size,
+                                batch_size=args.val_batch_size,
+                                shuffle=False,
+                                num_workers=args.num_workers))
         solver.sample(loaders)
 
     elif args.mode == 'eval':
@@ -84,7 +86,7 @@ def main(args):
         raise NotImplementedError
 
 
-if __name__ == '__main__':
+def get_args():
     parser = argparse.ArgumentParser()
 
     # model arguments
@@ -147,9 +149,9 @@ if __name__ == '__main__':
                         help='Seed for random number generator')
 
     # directory for training
-    parser.add_argument('--train_img_dir', type=str, default='data/case_data1/fluent_data_fig',
+    parser.add_argument('--train_img_dir', type=str, default='data/case_data1/fluent_data_map',
                         help='Directory containing training images')
-    parser.add_argument('--val_img_dir', type=str, default='data/case_data2/fluent_data_fig',
+    parser.add_argument('--val_img_dir', type=str, default='data/case_data2/fluent_data_map',
                         help='Directory containing validation images')
     parser.add_argument('--sample_dir', type=str, default='expr/samples',
                         help='Directory for saving generated images')
@@ -182,5 +184,9 @@ if __name__ == '__main__':
     parser.add_argument('--save_every', type=int, default=10000)
     parser.add_argument('--eval_every', type=int, default=50000)
 
-    args = parser.parse_args()
+    return parser.parse_args()
+    
+    
+if __name__ == '__main__':
+    args = get_args()
     main(args)

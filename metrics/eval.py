@@ -28,21 +28,10 @@ from core import utils
 color_map ={'pressure':'viridis', 'temperature':'PiYG', 'velocity':'magma'}
 
 
-def load_transform_image(file_path, target_height=256, target_width=512):
-    img = Image.open(file_path).convert('L')
-    image = np.array(img)
-    original_height, original_width = image.shape
-    scale = target_height / original_height
-    new_width = int(original_width * scale)
-    resized = cv2.resize(image, (new_width, target_height), interpolation=cv2.INTER_LINEAR)
-        
-    width_left = (resized.shape[1] - target_width) // 2
-    cropped = resized[:, width_left:width_left + target_width]
-    
-    img = 1.0 - (cropped.astype(np.float32) / 255.0)
-    # img = np.expand_dims(img, axis=0)  # 形状变为 (1, H, W)
-    
-    tensor = torch.from_numpy(img)
+def load_transform_image(file_path):
+    image = np.array(Image.open(file_path).convert('L'))
+    image_norm = 1.0 - (image.astype(np.float32) / 255.0)
+    tensor = torch.from_numpy(image_norm)
     return tensor
 
 
@@ -50,6 +39,10 @@ def visualize_results(contour, prediction, file_name, gt_name, cmap=None):
     # Create a plot with the reversed grayscale colormap so 0=white, 1=black
     if cmap is None:
         cmap = 'gray_r'
+
+    if len(contour.shape) == 4:
+        contour = contour.squeeze()
+
     pred = (prediction * contour).cpu()
     label = load_transform_image(gt_name)
     label = label * contour.cpu()
@@ -80,20 +73,23 @@ def calculate_metrics(nets, args, step, mode):
             continue
         src_domains = ['contour']
         print(f'src_domains={src_domains}, and target domain={trg_domain}')
+
         if mode == 'reference':
             path_ref = os.path.join(args.train_img_dir, trg_domain)
-            loader_ref = get_eval_loader(root=path_ref,
-                                         img_size=args.img_size,
-                                         batch_size=args.val_batch_size,
-                                         imagenet_normalize=False,
-                                         drop_last=True)
+            loader_ref = get_eval_loader(
+                                root=path_ref,
+                                img_size=args.img_size,
+                                batch_size=args.val_batch_size,
+                                imagenet_normalize=False,
+                                drop_last=True)
 
         for src_idx, src_domain in enumerate(src_domains):
             path_src = os.path.join(args.val_img_dir, src_domain)
-            loader_src = get_eval_loader(root=path_src,
-                                         img_size=args.img_size,
-                                         batch_size=args.val_batch_size,
-                                         imagenet_normalize=False)
+            loader_src = get_eval_loader(
+                                root=path_src,
+                                img_size=args.img_size,
+                                batch_size=args.val_batch_size,
+                                imagenet_normalize=False)
 
             task = '%s-to-%s' % (src_domain, trg_domain)
             path_fake = os.path.join(args.eval_dir, task)
@@ -135,13 +131,14 @@ def calculate_metrics(nets, args, step, mode):
                 # save generated images to calculate FID later
                 for k in range(N):
                     fname = filename[k]
-                    pred_name = os.path.join(path_fake, fname.replace('.tiff', '.png'))
+                    pred_name = os.path.join(path_fake, fname)
                     gt_name = os.path.join(args.val_img_dir, trg_domain, fname)
-                    visualize_results(contour=x_src[k].squeeze(), 
-                                      prediction=avg_image[k], 
-                                      file_name=pred_name,
-                                      gt_name=gt_name, 
-                                      cmap=color_map[trg_domain])
+                    visualize_results(
+                        contour=x_src[k], 
+                        prediction=avg_image[k], 
+                        file_name=pred_name,
+                        gt_name=gt_name, 
+                        cmap=color_map[trg_domain])
                     
                 #     utils.save_image(avg_image, ncol=1, filename=filename)
         ##############################################################################
