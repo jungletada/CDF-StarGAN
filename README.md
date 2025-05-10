@@ -40,7 +40,8 @@ To train StarGAN v2 from scratch, run the following commands. Generated images a
 ```bash
 python main.py \
       --mode train \
-      --num_domains 4 --w_hpf 1 \
+      --num_domains 4 \
+      --w_hpf 1
 ```
 
 ## Evaluation metrics
@@ -58,13 +59,19 @@ python main.py \
 ```
 
 Note that the evaluation metrics are calculated using random latent vectors or reference images, both of which are selected by the [seed number](https://github.com/clovaai/stargan-v2/blob/master/main.py#L35). In the paper, we reported the average of values from 10 measurements using different seed numbers. The following table shows the calculated values for both latent-guided and reference-guided synthesis.
+Evaluation Results:
+| Domain | MAE | RMSE | R2 | MAPE |
+|--------|-----|------|----|----- |
+| pressure | 4.1236 | 6.0723 | 0.9159 | 38.8194 |
+| temperature | 0.2324 | 0.7555 | 0.6645 | 0.0767 |
+| velocity | 0.0118 | 0.0228 | 0.9490 | 12.4449 |
 
 
 ## License
 The source code, pre-trained models, and dataset are available under [Creative Commons BY-NC 4.0](https://github.com/clovaai/stargan-v2/blob/master/LICENSE) license by NAVER Corporation. You can **use, copy, tranform and build upon** the material for **non-commercial purposes** as long as you give **appropriate credit** by citing our paper, and indicate if changes were made. 
 
-For business inquiries, please contact clova-jobs@navercorp.com.<br/>	
-For technical and other inquires, please contact yunjey.choi@navercorp.com.
+<!-- For business inquiries, please contact clova-jobs@navercorp.com.<br/>	
+For technical and other inquires, please contact yunjey.choi@navercorp.com. -->
 
 
 ## Citation

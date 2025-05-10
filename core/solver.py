@@ -9,6 +9,7 @@ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
 
 import os
+import logging
 from os.path import join as ospj
 import time
 import datetime
@@ -81,7 +82,15 @@ class Solver(nn.Module):
         nets = self.nets
         nets_ema = self.nets_ema
         optims = self.optims
-
+        # logger setup
+        logging.basicConfig(
+            filename=os.path.join(args.checkpoint_dir, 'train.log'), 
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s')
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        console.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logging.getLogger('').addHandler(console)
         # fetch random validation images for debugging
         fetcher = InputFetcher(loaders.src, loaders.ref, args.latent_dim, 'train')
         fetcher_val = InputFetcher(loaders.val, None, args.latent_dim, 'val')
@@ -94,7 +103,7 @@ class Solver(nn.Module):
         # remember the initial value of ds weight
         initial_lambda_ds = args.lambda_ds
 
-        print('Start training...')
+        logging.info('Start training...')
         start_time = time.time()
         for i in range(args.resume_iter, args.total_iters):
             # fetch images and labels
@@ -154,7 +163,7 @@ class Solver(nn.Module):
                         all_losses[prefix + key] = value
                 all_losses['G/lambda_ds'] = args.lambda_ds
                 log += ' '.join(['%s: [%.4f]' % (key, value) for key, value in all_losses.items()])
-                print(log)
+                logging.info(log)
 
             # generate images for debugging
             if (i+1) % args.sample_every == 0:
@@ -193,6 +202,7 @@ class Solver(nn.Module):
         args = self.args
         nets_ema = self.nets_ema
         self._load_checkpoint(args.resume_iter)
+        # calculate_metrics(nets_ema, args, mode='latent')
         calculate_metrics(nets_ema, args, mode='reference')
 
 

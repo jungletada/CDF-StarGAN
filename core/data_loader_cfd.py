@@ -26,12 +26,6 @@ STAT_temperature={'min': 299.9764404, 'max': 310.3595276}
 STAT_velocity={'min': 0.0, 'max':0.3930110071636349}
 
 
-def _make_balanced_sampler(labels):
-    class_counts = np.bincount(labels)
-    class_weights = 1. / class_counts
-    weights = class_weights[labels]
-    return WeightedRandomSampler(weights, len(weights))
-
 
 def listdir(dname):
     fnames = list(chain(
@@ -66,27 +60,30 @@ class ReferenceDataset(data.Dataset):
 
     def _make_dataset(self, root):
         domains = os.listdir(root)
-        print(domains)
-        fnames, fnames2, labels = [], [], []
+        src_domain = 'contour'
+        src_names, trg_names, labels = [], [], []
+        src_fnames = sorted(listdir(os.path.join(root, src_domain)))
+        
         for idx, domain in enumerate(sorted(domains)):
-            class_dir = os.path.join(root, domain)
-            cls_fnames = listdir(class_dir)
-            fnames += cls_fnames
-            fnames2 += random.sample(cls_fnames, len(cls_fnames))
-            labels += [idx] * len(cls_fnames)
-        return list(zip(fnames, fnames2)), labels
+            if domain == src_domain:
+                continue
+            src_names += src_fnames
+            trg_fnames = sorted(listdir(os.path.join(root, domain)))
+            trg_names += random.sample(trg_fnames, len(trg_fnames))
+            labels += [idx] * len(trg_fnames)
+        return list(zip(src_names, trg_names)), labels
 
     def __getitem__(self, index):
-        fname, fname2 = self.samples[index]
+        src_fname, trg_fname = self.samples[index]
         label = self.targets[index]
-        image1 = torch.from_numpy(np.array(Image.open(fname).convert('L')))
-        image1 = image1 / 255. * 2. - 1. #  [0, 255] -> [-1, 1]
-        image1 = image1.unsqueeze(0)
+        src_image = torch.from_numpy(np.array(Image.open(src_fname).convert('L')))
+        src_image = src_image / 255. * 2. - 1. #  [0, 255] -> [-1, 1]
+        src_image = src_image.unsqueeze(0)
 
-        image2 = torch.from_numpy(np.array(Image.open(fname2).convert('L')))
-        image2 = image2 / 255. * 2. - 1. #  [0, 255] -> [-1, 1]
-        image2 = image2.unsqueeze(0)
-        return image1, image2, label
+        trg_image = torch.from_numpy(np.array(Image.open(trg_fname).convert('L')))
+        trg_image = trg_image / 255. * 2. - 1. #  [0, 255] -> [-1, 1]
+        trg_image = trg_image.unsqueeze(0)
+        return src_image, trg_image, label
 
     def __len__(self):
         return len(self.targets)
@@ -96,6 +93,15 @@ class CustomImageFolder(ImageFolder):
     def __init__(self, root, loader=None, is_valid_file=None):
         super(CustomImageFolder, self).__init__(
             root, loader=loader, is_valid_file=is_valid_file)
+        # Filter out samples from 'contour' directory
+        filtered_samples = []
+        filtered_targets = []
+        for path, target in self.samples:
+            if 'contour' not in path:
+                filtered_samples.append((path, target))
+                filtered_targets.append(target)
+        self.samples = filtered_samples
+        self.targets = filtered_targets
 
     def __getitem__(self, index):
         path, target = self.samples[index]
@@ -111,12 +117,14 @@ def get_train_loader(root, which='source', batch_size=8, num_workers=4):
     
     if which == 'source':
         dataset = CustomImageFolder(root)
+        
     elif which == 'reference':
         dataset = ReferenceDataset(root)
+        
     else:
         raise NotImplementedError
 
-    sampler = _make_balanced_sampler(dataset.targets)
+    sampler = data.sampler.RandomSampler(dataset)
     return data.DataLoader(
         dataset=dataset,
         batch_size=batch_size,
@@ -195,5 +203,9 @@ class InputFetcher:
 
 
 if __name__ == '__main__':
-    dataset = ReferenceDataset(root='data/case_data1/fluent_data_map')
-    print(len(dataset))
+    # dataset = ReferenceDataset(root='data/case_data1/fluent_data_map')
+    dataset = CustomImageFolder(root='data/case_data1/fluent_data_map')
+    print(dataset.targets)
+    # print(len(dataset))
+    # for data_ in dataset[580]:
+    #     print(data_)
