@@ -71,7 +71,7 @@ def visualize_results(mask, pred, file_name, cmap='gray_r'):
     img_colored.save(file_name)
     
     
-def evaluate(pred, label, key, mask, denormalize=True):
+def evaluate(pred, label, key, mask, denormalize=False):
     if len(mask.shape) == 4 or len(mask.shape) == 3:
         mask = mask.squeeze()
         pred = pred.squeeze()
@@ -93,13 +93,12 @@ def evaluate(pred, label, key, mask, denormalize=True):
     mae = np.mean(np.abs(y_true - y_pred))
     rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
     r2 = r2_score(y_true, y_pred)
-    mape = mean_absolute_percentage_error(y_true, y_pred) * 100
+    # mape = mean_absolute_percentage_error(y_true, y_pred) * 100
 
     return {
         'MAE': mae,
         'RMSE': rmse,
         'R2': r2,
-        'MAPE': mape,
     }
     
     
@@ -126,7 +125,7 @@ def calculate_metrics(nets, args, mode):
     num = len(loader_src.dataset)
     logging.info(f'Number of samples in Test: {num}')
     # -------------------- Inference and saving --------------------
-    metrics = ['MAE', 'RMSE', 'R2', 'MAPE']
+    metrics = ['MAE', 'RMSE', 'R2']
     fields = ['pressure', 'temperature', 'velocity']
     sum_results = {field: {metric: 0. for metric in metrics} for field in fields}
     avg_results = {field: {metric: 0. for metric in metrics} for field in fields}
@@ -139,7 +138,7 @@ def calculate_metrics(nets, args, mode):
         
         if mode == 'reference':
             # Make target dataloader
-            path_ref = os.path.join(args.val_img_dir, trg_domain) # we can only access the train_img_dir
+            path_ref = os.path.join(args.train_img_dir, trg_domain) # we can only access the train_img_dir
             loader_ref = get_eval_loader(root=path_ref, batch_size=1)
             dataset_ref = loader_ref.dataset
         
@@ -169,13 +168,13 @@ def calculate_metrics(nets, args, mode):
                 else:
                     # Randomly select a reference image
                     # x_ref = loader_ref.dataset[idx]['image'].unsqueeze(0).to(device)
-                    # try:
-                    #     x_ref = next(iter_ref)['image'].to(device)
-                    # except:
-                    #     iter_ref = iter(loader_ref)
-                    #     x_ref = next(iter_ref)['image'].to(device)
+                    try:
+                        x_ref = next(iter_ref)['image'].to(device)
+                    except:
+                        iter_ref = iter(loader_ref)
+                        x_ref = next(iter_ref)['image'].to(device)
                     
-                    x_ref = dataset_ref[i]['image'].unsqueeze(0).to(device)
+                    # x_ref = dataset_ref[i]['image'].unsqueeze(0).to(device)
                     # trg_filename =  dataset_ref[i]['filename']
                     
                     if x_ref.size(0) > N:
@@ -218,12 +217,12 @@ def calculate_metrics(nets, args, mode):
                     for domain, value_dict in sum_results.items()}
     
     # Create markdown table header
-    table =  "| Domain | MAE | RMSE | R2 | MAPE |\n"
-    table += "|--------|-----|------|----|----- |\n"
+    table =  "| Domain | MAE | RMSE | R2 |\n"
+    table += "|--------|-----|------|----|\n"
     
     # Add rows for each domain
     for domain, metrics in avg_results.items():
-        table += f"| {domain} | {metrics['MAE']:.4f} | {metrics['RMSE']:.4f} | {metrics['R2']:.4f} | {metrics['MAPE']:.4f} |\n"
+        table += f"| {domain} | {metrics['MAE']:.4f} | {metrics['RMSE']:.4f} | {metrics['R2']:.4f} |\n"
     
     logging.info("\nEvaluation Results:\n" + table)
            
