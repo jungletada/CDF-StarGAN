@@ -38,9 +38,9 @@ pip install pillow==7.0.0 scipy==1.2.1 tqdm==4.43.0 munch==2.5.0
 To train StarGAN v2 from scratch, run the following commands. Generated images and network checkpoints will be stored in the `expr/samples` and `expr/checkpoints` directories, respectively. Training takes about three days on a single Tesla V100 GPU. Please see [here](https://github.com/clovaai/stargan-v2/blob/master/main.py#L86-L179) for training arguments and a description of them. 
 
 ```bash
-python main.py --mode train --num_domains 4 --w_hpf 1 \
-               --train_img_dir data/case_data1/fluent_data_map \
-               --val_img_dir data/case_data2/fluent_data_map \
+python main.py \
+      --mode train \
+      --num_domains 4 --w_hpf 1 \
 ```
 
 ## Evaluation metrics
@@ -48,12 +48,13 @@ To evaluate StarGAN v2 using [Fr&eacute;chet Inception Distance (FID)](https://a
 
 
 ```bash
-python main.py --mode eval --num_domains 4 --w_hpf 1 \
-               --train_img_dir data/case_data1/fluent_data_map \
-               --val_img_dir data/case_data2/fluent_data_map \
-               --checkpoint_dir expr/checkpoints \
-               --resume_iter 100000 \
-               --eval_dir expr/eval
+python main.py \
+        --mode eval \
+        --num_domains 4 \
+        --w_hpf 1 \
+        --checkpoint_dir expr/checkpoints \
+        --resume_iter 100000 \
+        --eval_dir expr/eval
 ```
 
 Note that the evaluation metrics are calculated using random latent vectors or reference images, both of which are selected by the [seed number](https://github.com/clovaai/stargan-v2/blob/master/main.py#L35). In the paper, we reported the average of values from 10 measurements using different seed numbers. The following table shows the calculated values for both latent-guided and reference-guided synthesis.

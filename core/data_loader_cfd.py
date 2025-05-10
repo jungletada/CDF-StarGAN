@@ -8,10 +8,7 @@ http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
 import os
-import cv2
 import torch
-
-
 import random
 import numpy as np
 from pathlib import Path
@@ -22,6 +19,11 @@ from PIL import Image
 from torch.utils import data
 from torch.utils.data.sampler import WeightedRandomSampler
 from torchvision.datasets import ImageFolder
+
+
+STAT_pressure={'min': -37.73662186, 'max': 57.6361618}
+STAT_temperature={'min': 299.9764404, 'max': 310.3595276}
+STAT_velocity={'min': 0.0, 'max':0.3930110071636349}
 
 
 def _make_balanced_sampler(labels):
@@ -49,7 +51,10 @@ class DefaultDataset(data.Dataset):
         image = torch.from_numpy(np.array(Image.open(fname).convert('L')))
         image = image / 255. * 2. - 1. #  [0, 255] -> [-1, 1]
         image = image.unsqueeze(0)
-        return {'image': image, 'filename':str(os.path.basename(fname))}
+        return {
+            'image': image, 
+            'filename':str(os.path.basename(fname)),
+            }
 
     def __len__(self):
         return len(self.samples)
@@ -61,6 +66,7 @@ class ReferenceDataset(data.Dataset):
 
     def _make_dataset(self, root):
         domains = os.listdir(root)
+        print(domains)
         fnames, fnames2, labels = [], [], []
         for idx, domain in enumerate(sorted(domains)):
             class_dir = os.path.join(root, domain)
@@ -120,7 +126,7 @@ def get_train_loader(root, which='source', batch_size=8, num_workers=4):
         drop_last=True)
 
 
-def get_eval_loader(root, batch_size=32, shuffle=True, num_workers=4, drop_last=False):
+def get_eval_loader(root, batch_size=1, shuffle=False, num_workers=4, drop_last=False):
     print('Preparing DataLoader for the evaluation phase...')
     dataset = DefaultDataset(root)
     return data.DataLoader(
@@ -132,7 +138,7 @@ def get_eval_loader(root, batch_size=32, shuffle=True, num_workers=4, drop_last=
             drop_last=drop_last)
 
 
-def get_test_loader(root, batch_size=32, shuffle=True, num_workers=4):
+def get_test_loader(root, batch_size=1, shuffle=False, num_workers=4):
     print('Preparing DataLoader for the generation phase...')
     dataset = CustomImageFolder(root)
     return data.DataLoader(dataset=dataset,
@@ -186,3 +192,8 @@ class InputFetcher:
 
         return Munch({k: v.to(self.device)
                       for k, v in inputs.items()})
+
+
+if __name__ == '__main__':
+    dataset = ReferenceDataset(root='data/case_data1/fluent_data_map')
+    print(len(dataset))

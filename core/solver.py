@@ -192,10 +192,8 @@ class Solver(nn.Module):
     def evaluate(self):
         args = self.args
         nets_ema = self.nets_ema
-        resume_iter = args.resume_iter
         self._load_checkpoint(args.resume_iter)
-        # calculate_metrics(nets_ema, args, step=resume_iter, mode='latent')
-        calculate_metrics(nets_ema, args, step=resume_iter, mode='reference')
+        calculate_metrics(nets_ema, args, mode='reference')
 
 
 def compute_d_loss(nets, args, x_real, y_org, y_trg, z_trg=None, x_ref=None, masks=None):

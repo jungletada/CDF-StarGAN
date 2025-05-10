@@ -41,22 +41,22 @@ def main(args):
         assert len(subdirs(args.val_img_dir)) == args.num_domains
         loaders = Munch(
                 src=get_train_loader(
-                    root=args.train_img_dir,
-                    which='source',
-                    batch_size=args.batch_size,
-                    num_workers=args.num_workers),
+                        root=args.train_img_dir,
+                        which='source',
+                        batch_size=args.batch_size,
+                        num_workers=args.num_workers),
 
                 ref=get_train_loader(
-                    root=args.train_img_dir,
-                    which='reference',
-                    batch_size=args.batch_size,
-                    num_workers=args.num_workers),
+                        root=args.train_img_dir,
+                        which='reference',
+                        batch_size=args.batch_size,
+                        num_workers=args.num_workers),
 
                 val=get_test_loader(
-                    root=args.val_img_dir,
-                    batch_size=args.val_batch_size,
-                    shuffle=True,
-                    num_workers=args.num_workers))
+                        root=args.val_img_dir,
+                        batch_size=args.val_batch_size,
+                        shuffle=True,
+                        num_workers=args.num_workers))
         
         solver.train(loaders)
 
@@ -78,10 +78,7 @@ def main(args):
 
     elif args.mode == 'eval':
         solver.evaluate()
-
-    elif args.mode == 'align':
-        from core.wing import align_faces
-        align_faces(args, args.inp_dir, args.out_dir)
+        
     else:
         raise NotImplementedError
 
