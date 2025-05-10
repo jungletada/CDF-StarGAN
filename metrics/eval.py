@@ -19,7 +19,8 @@ from tqdm import tqdm
 import torch
 import matplotlib
 
-from sklearn.metrics import r2_score, mean_absolute_percentage_error
+from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
 
 from core import utils
 from core.data_loader_cfd import get_eval_loader, DefaultDataset
@@ -85,6 +86,8 @@ def evaluate(pred, label, key, mask, denormalize=False):
         pred = pred * (stat['max'] - stat['min']) + stat['min']
         label = label * (stat['max'] - stat['min']) + stat['min']
 
+    img_true = (label * mask).astype(np.float32)
+    img_pred = (pred * mask).astype(np.float32)
     # Flatten arrays to 1D for metric calculations
     y_true = label[mask].flatten()
     y_pred = pred[mask].flatten()
@@ -92,13 +95,15 @@ def evaluate(pred, label, key, mask, denormalize=False):
     # Compute metrics
     mae = np.mean(np.abs(y_true - y_pred))
     rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
-    r2 = r2_score(y_true, y_pred)
-    # mape = mean_absolute_percentage_error(y_true, y_pred) * 100
+    
+    ssim_value = ssim(img_true, img_pred, data_range=img_true.max() - img_true.min())
+    psnr_value = psnr(img_true, img_pred, data_range=img_true.max() - img_true.min())
 
     return {
         'MAE': mae,
         'RMSE': rmse,
-        'R2': r2,
+        'SSIM': ssim_value,
+        'PSNR': psnr_value
     }
     
     
@@ -125,7 +130,7 @@ def calculate_metrics(nets, args, mode):
     num = len(loader_src.dataset)
     logging.info(f'Number of samples in Test: {num}')
     # -------------------- Inference and saving --------------------
-    metrics = ['MAE', 'RMSE', 'R2']
+    metrics = ['MAE', 'RMSE', 'SSIM', 'PSNR']
     fields = ['pressure', 'temperature', 'velocity']
     sum_results = {field: {metric: 0. for metric in metrics} for field in fields}
     avg_results = {field: {metric: 0. for metric in metrics} for field in fields}
@@ -217,12 +222,12 @@ def calculate_metrics(nets, args, mode):
                     for domain, value_dict in sum_results.items()}
     
     # Create markdown table header
-    table =  "| Domain | MAE | RMSE | R2 |\n"
-    table += "|--------|-----|------|----|\n"
+    table =  "| Domain |  MAE  |  RMSE  |  SSIM  |  PSNR  |\n"
+    table += "|--------|-------|--------|--------|--------|\n"
     
     # Add rows for each domain
     for domain, metrics in avg_results.items():
-        table += f"| {domain} | {metrics['MAE']:.4f} | {metrics['RMSE']:.4f} | {metrics['R2']:.4f} |\n"
+        table += f"| {domain} | {metrics['MAE']:.4f} | {metrics['RMSE']:.4f} |{metrics['SSIM']:.4f} | {metrics['PSNR']:.4f} |\n"
     
     logging.info("\nEvaluation Results:\n" + table)
            

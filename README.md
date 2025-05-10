@@ -60,11 +60,11 @@ python main.py \
 
 Note that the evaluation metrics are calculated using random latent vectors or reference images, both of which are selected by the [seed number](https://github.com/clovaai/stargan-v2/blob/master/main.py#L35). In the paper, we reported the average of values from 10 measurements using different seed numbers. The following table shows the calculated values for both latent-guided and reference-guided synthesis.
 Evaluation Results:
-| Domain     | MAE    | RMSE    | SSIM   | PSNR |
-|------------|--------|---------|--------|------|
-| pressure   | 0.0788 | 0.1001  |
-| temperature| 0.0783 | 0.1352  |
-| velocity   | 0.1158 | 0.1538  |
+| Domain |  MAE  |  RMSE  |  SSIM  |  PSNR  |
+|--------|-------|--------|--------|--------|
+| pressure | 0.0788 | 0.1001 |0.8346 | 19.9828 |
+| temperature | 0.0783 | 0.1352 |0.7865 | 17.5058 |
+| velocity | 0.1158 | 0.1538 |0.6275 | 16.5499 |
 
 
 ## License
