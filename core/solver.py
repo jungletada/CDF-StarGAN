@@ -19,10 +19,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import core.utils as utils
 from core.model import build_model
 from core.checkpoint import CheckpointIO
 from core.data_loader_cfd import InputFetcher
-import core.utils as utils
+
 from metrics.eval import calculate_metrics
 
 

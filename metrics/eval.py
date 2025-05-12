@@ -60,8 +60,8 @@ def visualize_results(mask, pred, file_name, cmap='gray_r'):
         mask = mask.squeeze()
         pred = pred.squeeze()
         
-    mask = mask.cpu().numpy()
-    pred = pred.cpu().numpy()
+    # mask = mask.cpu().numpy()
+    # pred = pred.cpu().numpy()
     
     # colorize
     cm = matplotlib.colormaps[cmap]
@@ -77,17 +77,17 @@ def evaluate(pred, label, key, mask, denormalize=False):
         mask = mask.squeeze()
         pred = pred.squeeze()
         
-    mask = mask.cpu().numpy()
-    pred = pred.cpu().numpy()
-    label = label.cpu().numpy()
+    # mask = mask.cpu().numpy()
+    # pred = pred.cpu().numpy()
+    # label = label.cpu().numpy()
     
     if denormalize:
         stat = load_scale(key)
         pred = pred * (stat['max'] - stat['min']) + stat['min']
         label = label * (stat['max'] - stat['min']) + stat['min']
 
-    img_true = (label * mask).astype(np.float32)
-    img_pred = (pred * mask).astype(np.float32)
+    img_true = (label * mask * 255.).astype(np.uint8)
+    img_pred = (pred * mask * 255.).astype(np.uint8)
     # Flatten arrays to 1D for metric calculations
     y_true = label[mask].flatten()
     y_pred = pred[mask].flatten()
@@ -149,10 +149,15 @@ def calculate_metrics(nets, args, mode):
             dataset_ref = loader_ref.dataset
         
         task = 'to-%s' % (trg_domain)
-        path_fake = os.path.join(args.eval_dir, task)
-        shutil.rmtree(path_fake, ignore_errors=True)
-        os.makedirs(path_fake)
-
+        path_vis = os.path.join(args.eval_dir, task)
+        
+        shutil.rmtree(path_vis, ignore_errors=True)
+        os.makedirs(path_vis)
+        
+        path_npz = os.path.join(args.npz_dir, task)
+        shutil.rmtree(path_npz, ignore_errors=True)
+        os.makedirs(path_npz)
+        
         logging.info('Generating images and evaluating for %s...' % task)
         for i, data_dict in enumerate(tqdm(loader_src, total=len(loader_src))):
             x_src = data_dict['image']
@@ -196,12 +201,21 @@ def calculate_metrics(nets, args, mode):
             # save generated images to evaluate
             for k in range(N):
                 name = src_filename[k]
-                pred_name = os.path.join(path_fake, name)
+                pred_name = os.path.join(path_vis, name)
                 label_name = os.path.join(args.val_img_dir, trg_domain, name)
                 label = load_label(label_name)
                 
                 mask = (x_src[k] >= 0.5)
                 pred = ((avg_image[k] + 1.) / 2.).clip(0, 1)   
+                
+                mask = mask.cpu().numpy()
+                pred = pred.cpu().numpy()
+                label = label.cpu().numpy()
+                
+                npz_name = os.path.join(path_vis, name.replace('.png', '.npz'))
+                np.savez(npz_name, 
+                         mask=mask, 
+                         pred=pred)
                 
                 visualize_results(
                     mask=mask, 

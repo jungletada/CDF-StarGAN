@@ -133,7 +133,7 @@ def get_args():
                         help='Decay rate for 2nd moment of Adam')
     parser.add_argument('--weight_decay', type=float, default=1e-4,
                         help='Weight decay for optimizer')
-    parser.add_argument('--num_outs_per_domain', type=int, default=10,
+    parser.add_argument('--num_outs_per_domain', type=int, default=1,
                         help='Number of generated images per domain during sampling')
 
     # misc
@@ -158,7 +158,8 @@ def get_args():
     # directory for calculating metrics
     parser.add_argument('--eval_dir', type=str, default='expr/eval',
                         help='Directory for saving metrics, i.e., FID and LPIPS')
-
+    parser.add_argument('--npz_dir', type=str, default='expr/npz_pred',
+                        help='Directory for saving npz files')
     # directory for testing
     parser.add_argument('--result_dir', type=str, default='expr/results',
                         help='Directory for saving generated images and videos')

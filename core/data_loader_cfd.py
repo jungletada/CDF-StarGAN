@@ -60,18 +60,14 @@ class ReferenceDataset(data.Dataset):
 
     def _make_dataset(self, root):
         domains = os.listdir(root)
-        src_domain = 'contour'
-        src_names, trg_names, labels = [], [], []
-        src_fnames = sorted(listdir(os.path.join(root, src_domain)))
-        
+        fnames, fnames2, labels = [], [], []
         for idx, domain in enumerate(sorted(domains)):
-            if domain == src_domain:
-                continue
-            src_names += src_fnames
-            trg_fnames = sorted(listdir(os.path.join(root, domain)))
-            trg_names += random.sample(trg_fnames, len(trg_fnames))
-            labels += [idx] * len(trg_fnames)
-        return list(zip(src_names, trg_names)), labels
+            class_dir = os.path.join(root, domain)
+            cls_fnames = listdir(class_dir)
+            fnames += cls_fnames
+            fnames2 += random.sample(cls_fnames, len(cls_fnames))
+            labels += [idx] * len(cls_fnames)
+        return list(zip(fnames, fnames2)), labels
 
     def __getitem__(self, index):
         src_fname, trg_fname = self.samples[index]
@@ -94,14 +90,14 @@ class CustomImageFolder(ImageFolder):
         super(CustomImageFolder, self).__init__(
             root, loader=loader, is_valid_file=is_valid_file)
         # Filter out samples from 'contour' directory
-        filtered_samples = []
-        filtered_targets = []
-        for path, target in self.samples:
-            if 'contour' not in path:
-                filtered_samples.append((path, target))
-                filtered_targets.append(target)
-        self.samples = filtered_samples
-        self.targets = filtered_targets
+        # filtered_samples = []
+        # filtered_targets = []
+        # for path, target in self.samples:
+        #     if 'contour' not in path:
+        #         filtered_samples.append((path, target))
+        #         filtered_targets.append(target)
+        # self.samples = filtered_samples
+        # self.targets = filtered_targets
 
     def __getitem__(self, index):
         path, target = self.samples[index]
